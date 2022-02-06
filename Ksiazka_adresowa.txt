@@ -19,7 +19,12 @@ struct ksiazka_adresowa
 
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
 {
-    int pozycjaWpisu=liczbaPozycjiWKsiazce;
+    int pozycjaWpisu;
+    cout << liczbaPozycjiWKsiazce <<endl <<WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu <<endl;
+    system("pause");
+
+    if (WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu==liczbaPozycjiWKsiazce) pozycjaWpisu=liczbaPozycjiWKsiazce;
+    else pozycjaWpisu=liczbaPozycjiWKsiazce+1;
     string imie;
     string nazwisko;
     string telefon;
@@ -27,7 +32,8 @@ int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczba
     string adres;
     ksiazka_adresowa Adresat;
 
-    system("cls");
+
+    system("cls");    cout << pozycjaWpisu << endl;
     cout << "Podaj imie: "<<endl;
     cin.sync();
     getline(cin, imie);
@@ -371,7 +377,7 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
     }
     else cout << "Bledny numer pozycji wpisu. Sprobuj jeszcze raz. "<<endl;
     Sleep(700);
-    edycjaWybranejPozycji(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
+    edycjaWybranejPozycji(WpisWKsiazceAdresowej, liczbaPozycjiWKsiazce);
 }
 
 void zapisaniePlikuPrzedZamknieciem (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycji)
@@ -424,7 +430,9 @@ int main()
 
         if (wybraneZadanie=='1')
         {
-            liczbaPozycjiWKsiazce=dodaniePozycji(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
+            cout<<WpisWKsiazceAdresowej.size();
+            system("pause");
+            liczbaPozycjiWKsiazce=dodaniePozycji(WpisWKsiazceAdresowej,WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='2')
         {
@@ -437,10 +445,12 @@ int main()
         else if (wybraneZadanie=='4')
         {
             edycjaWybranejPozycji(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
+            zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='5')
         {
             usuniecieWpisu(WpisWKsiazceAdresowej);
+            zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='6')
         {
