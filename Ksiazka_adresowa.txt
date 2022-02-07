@@ -20,11 +20,10 @@ struct ksiazka_adresowa
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
 {
     int pozycjaWpisu;
-    cout << liczbaPozycjiWKsiazce <<endl <<WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu <<endl;
-    system("pause");
+    if (WpisWKsiazceAdresowej.size()==0) pozycjaWpisu=0;
+    else if (WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu>=liczbaPozycjiWKsiazce) pozycjaWpisu=WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu;
+    else pozycjaWpisu=liczbaPozycjiWKsiazce;
 
-    if (WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu==liczbaPozycjiWKsiazce) pozycjaWpisu=liczbaPozycjiWKsiazce;
-    else pozycjaWpisu=liczbaPozycjiWKsiazce+1;
     string imie;
     string nazwisko;
     string telefon;
@@ -33,7 +32,7 @@ int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczba
     ksiazka_adresowa Adresat;
 
 
-    system("cls");    cout << pozycjaWpisu << endl;
+    system("cls");
     cout << "Podaj imie: "<<endl;
     cin.sync();
     getline(cin, imie);
@@ -176,9 +175,10 @@ void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej,
     }
 }
 
-void usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
+int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
 {
     system("cls");
+    int liczbaPozycji=WpisWKsiazceAdresowej.size();
     int pozycjaDoUsuniecia;
     cout <<"Podaj pozycje do usuniecia: ";
     cin >> pozycjaDoUsuniecia;
@@ -203,15 +203,17 @@ void usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
                 Sleep(500);
                 cout <<"Wybrana pozycja zostala usunieta. Powrot do menu glownego.";
                 system("pause");
-                return;
+                liczbaPozycji--;
+                return liczbaPozycji;
             }
             else cout << "Pozycja nie zostala usunieta. Powrot do menu glownego. ";
             system("pause");
-            return;
+            return liczbaPozycji;
         }
     }
     cout << "Brak podanej pozycji w ksiazce adresowej. ";
     system("pause");
+    return liczbaPozycji;
 }
 
 void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
@@ -430,9 +432,7 @@ int main()
 
         if (wybraneZadanie=='1')
         {
-            cout<<WpisWKsiazceAdresowej.size();
-            system("pause");
-            liczbaPozycjiWKsiazce=dodaniePozycji(WpisWKsiazceAdresowej,WpisWKsiazceAdresowej.size());
+            liczbaPozycjiWKsiazce=dodaniePozycji(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
         }
         else if (wybraneZadanie=='2')
         {
@@ -449,7 +449,7 @@ int main()
         }
         else if (wybraneZadanie=='5')
         {
-            usuniecieWpisu(WpisWKsiazceAdresowej);
+            liczbaPozycjiWKsiazce=usuniecieWpisu(WpisWKsiazceAdresowej);
             zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='6')
