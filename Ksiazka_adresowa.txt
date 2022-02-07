@@ -19,10 +19,12 @@ struct ksiazka_adresowa
 
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
 {
+
     int pozycjaWpisu;
     if (WpisWKsiazceAdresowej.size()==0) pozycjaWpisu=0;
     else if (WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu>=liczbaPozycjiWKsiazce) pozycjaWpisu=WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu;
     else pozycjaWpisu=liczbaPozycjiWKsiazce;
+
 
     string imie;
     string nazwisko;
@@ -319,67 +321,85 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
 {
     string potwierdzenieCheciEdycji;
     int pozycjaWpisu;
+    int licznikPomocniczy=0;
 
     system("cls");
     cout << "Edycja wpisu." << endl;
-    cout << "Obecnie w ksiazce adresowej masz "<<liczbaPozycjiWKsiazce<< " wpisanych osob."<<endl;
+//    cout << "Obecnie w ksiazce adresowej masz "<<liczbaPozycjiWKsiazce<< " wpisanych osob."<<endl;
     cout << "Podaj numer pozycji do edycji: ";
     cin >> pozycjaWpisu;
 
 
-    if (pozycjaWpisu<=liczbaPozycjiWKsiazce)
+    for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
     {
-        wypisanieDanejPozycji(WpisWKsiazceAdresowej,pozycjaWpisu-1);
-        cout << "Czy chcesz podac nowe dane tej osoby? Wpisz TAK dla potwierdzenia. ";
-        cin >> potwierdzenieCheciEdycji;
-
-        if ((potwierdzenieCheciEdycji=="TAK")||(potwierdzenieCheciEdycji=="tak"))
+        if (pozycjaWpisu!=WpisWKsiazceAdresowej[i].pozycjaWpisu)
         {
-            int wyborElementuDoZmiany;
-            cout << "Co chcesz zmienic? Podaj numer opcji."<<endl;
-            cout << "1. Imie" << endl;
-            cout << "2. Nazwisko" << endl;
-            cout << "3. Telefon" << endl;
-            cout << "4. Email" << endl;
-            cout << "5. Adres" << endl << endl;
-            cin >> wyborElementuDoZmiany;
-
-            switch(wyborElementuDoZmiany)
-            {
-            case 1:
-                cout << "Obecne imie: "<< WpisWKsiazceAdresowej[pozycjaWpisu-1].imie << ". Podaj nowe imie: ";
-                cin.sync();
-                getline(cin, WpisWKsiazceAdresowej[pozycjaWpisu-1].imie);
-                break;
-            case 2:
-                cout << "Obecne nazwisko: "<< WpisWKsiazceAdresowej[pozycjaWpisu-1].nazwisko << ". Podaj nowe nazwisko: ";
-                cin.sync();
-                getline(cin, WpisWKsiazceAdresowej[pozycjaWpisu-1].nazwisko);
-                break;
-            case 3:
-                cout << "Obecny telefon: "<< WpisWKsiazceAdresowej[pozycjaWpisu-1].telefon << ". Podaj nowy telefon: ";
-                cin.sync();
-                getline(cin, WpisWKsiazceAdresowej[pozycjaWpisu-1].telefon);
-                break;
-            case 4:
-                cout << "Obecny email: "<< WpisWKsiazceAdresowej[pozycjaWpisu-1].email <<  ". Podaj nowy email: ";
-                cin.sync();
-                getline(cin, WpisWKsiazceAdresowej[pozycjaWpisu-1].email);
-                break;
-            case 5:
-                cout <<"Obecny adres: "<< WpisWKsiazceAdresowej[pozycjaWpisu-1].adres << ". Podaj nowy adres: ";
-                cin.sync();
-                getline(cin, WpisWKsiazceAdresowej[pozycjaWpisu-1].adres);
-                break;
-            }
+            licznikPomocniczy++;
         }
-        else cout << "Powrot do menu glownego."<<endl;
-        system("pause");
-        return;
     }
-    else cout << "Bledny numer pozycji wpisu. Sprobuj jeszcze raz. "<<endl;
-    Sleep(700);
-    edycjaWybranejPozycji(WpisWKsiazceAdresowej, liczbaPozycjiWKsiazce);
+
+    if (licznikPomocniczy==WpisWKsiazceAdresowej.size())
+    {
+        cout << "Bledny numer pozycji wpisu. Sprobuj jeszcze raz. "<<endl;
+        Sleep(700);
+        edycjaWybranejPozycji(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
+    }
+
+
+    for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
+    {
+        if (pozycjaWpisu==WpisWKsiazceAdresowej[i].pozycjaWpisu)
+        {
+            wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+            cout << "Czy chcesz podac nowe dane tej osoby? Wpisz TAK dla potwierdzenia. ";
+            cin >> potwierdzenieCheciEdycji;
+
+            if ((potwierdzenieCheciEdycji=="TAK")||(potwierdzenieCheciEdycji=="tak"))
+            {
+                int wyborElementuDoZmiany;
+                cout << "Co chcesz zmienic? Podaj numer opcji."<<endl;
+                cout << "1. Imie" << endl;
+                cout << "2. Nazwisko" << endl;
+                cout << "3. Telefon" << endl;
+                cout << "4. Email" << endl;
+                cout << "5. Adres" << endl << endl;
+                cin >> wyborElementuDoZmiany;
+
+                switch(wyborElementuDoZmiany)
+                {
+                case 1:
+                    cout << "Obecne imie: "<< WpisWKsiazceAdresowej[i].imie << ". Podaj nowe imie: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].imie);
+                    break;
+                case 2:
+                    cout << "Obecne nazwisko: "<< WpisWKsiazceAdresowej[i].nazwisko << ". Podaj nowe nazwisko: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].nazwisko);
+                    break;
+                case 3:
+                    cout << "Obecny telefon: "<< WpisWKsiazceAdresowej[i].telefon << ". Podaj nowy telefon: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].telefon);
+                    break;
+                case 4:
+                    cout << "Obecny email: "<< WpisWKsiazceAdresowej[i].email <<  ". Podaj nowy email: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].email);
+                    break;
+                case 5:
+                    cout <<"Obecny adres: "<< WpisWKsiazceAdresowej[i].adres << ". Podaj nowy adres: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].adres);
+                    break;
+                }
+            }
+            else cout << "Powrot do menu glownego."<<endl;
+            system("pause");
+            return;
+        }
+    }
+
 }
 
 void zapisaniePlikuPrzedZamknieciem (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycji)
@@ -444,7 +464,7 @@ int main()
         }
         else if (wybraneZadanie=='4')
         {
-            edycjaWybranejPozycji(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
+            edycjaWybranejPozycji(WpisWKsiazceAdresowej,WpisWKsiazceAdresowej.size());
             zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='5')
