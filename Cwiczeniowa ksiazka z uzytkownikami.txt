@@ -1,0 +1,650 @@
+#include <iostream>
+#include <windows.h>
+#include <fstream>
+#include <cstdlib>
+#include <vector>
+
+using namespace std;
+
+struct ksiazka_adresowa
+{
+    int pozycjaWpisu;
+    string imie;
+    string nazwisko;
+    string telefon;
+    string email;
+    string adres;
+};
+
+struct lista_uzytkownikow
+{
+    int idUzytkownika;
+    string login;
+    string haslo;
+};
+
+
+void otworzeniePlikuUzytkonikow (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy);
+void logowanieUzytkownika (vector <lista_uzytkownikow> &listaUzytkownikow);
+void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy);
+int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
+void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
+void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
+int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej);
+void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej);
+void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej);
+void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
+void zapisaniePlikuPrzedZamknieciem (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycji);
+
+int main()
+{
+    vector <ksiazka_adresowa> WpisWKsiazceAdresowej;
+    vector <lista_uzytkownikow> zarejestrowaniUzytkownicy;
+    char wybraneZadanie;
+    int liczbaPozycjiWKsiazce=0, licznikPomocniczy=0;
+    otworzeniePlikuUzytkonikow(zarejestrowaniUzytkownicy);
+
+    while (true)
+    {
+        system("cls");
+
+        cout << "Twoja ksiazka adresowa. " << endl;
+        cout << "Aby wyswietlic dane, konieczne jest zalogowanie sie. " << endl;
+        cout << "Zaloguj sie badz zarejestruj. " << endl;
+        cout << "Wybierz opcje: " << endl;
+        cout << "1. Logowanie" << endl;
+        cout << "2. Rejestracja" << endl;
+        cout << "3. Zamknij program" << endl;
+        cout << "Podaj numer opcji: ";
+        cin >> wybraneZadanie;
+
+        if (wybraneZadanie=='1')
+        {
+            logowanieUzytkownika(zarejestrowaniUzytkownicy);
+        }
+        else if (wybraneZadanie=='2')
+        {
+            rejestracjaUzytkownika(zarejestrowaniUzytkownicy);
+        }
+        else if (wybraneZadanie=='3')
+        {
+            exit(0);
+        }
+        //Otworzenie pliku zalezne od zalogowanego uzytkownika!!
+
+        /*otworzeniePliku(WpisWKsiazceAdresowej);
+        int pom = WpisWKsiazceAdresowej.size();
+        if (pom!=0)
+        {
+            licznikPomocniczy = WpisWKsiazceAdresowej[pom-1].pozycjaWpisu;
+            if (licznikPomocniczy!=0)
+                liczbaPozycjiWKsiazce=licznikPomocniczy;
+        }
+        */
+
+
+        system("cls");
+
+        cout << "Ksiazka adresowa. Wybierz zadanie: " << endl;
+        cout << "1. Nowy wpis." << endl;
+        cout << "2. Znajdz osobe." << endl;
+        cout << "3. Wyswietl wszystkich." << endl;
+        cout << "4. Edycja wybranej pozycji." << endl;
+        cout << "5. Usuniecie wybranej pozycji" << endl;
+        cout << "6. Zapisz i zakoncz" << endl;
+        cout << "Podaj numer opcji: ";
+        cin >> wybraneZadanie;
+
+        if (wybraneZadanie=='1')
+        {
+            liczbaPozycjiWKsiazce=dodaniePozycji(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
+        }
+        else if (wybraneZadanie=='2')
+        {
+            wyszukiwanieOsobyWKsiazce(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
+        }
+        else if (wybraneZadanie=='3')
+        {
+            wyswietlenieWszystkichOsob(WpisWKsiazceAdresowej);
+        }
+        else if (wybraneZadanie=='4')
+        {
+            edycjaWybranejPozycji(WpisWKsiazceAdresowej,WpisWKsiazceAdresowej.size());
+            zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
+        }
+        else if (wybraneZadanie=='5')
+        {
+            liczbaPozycjiWKsiazce=usuniecieWpisu(WpisWKsiazceAdresowej);
+            zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
+        }
+        else if (wybraneZadanie=='6')
+        {
+            exit(0);
+        }
+    }
+    return 0;
+}
+
+void otworzeniePlikuUzytkonikow (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy)
+{
+    string login, haslo,idUzytkownika;
+    int id;
+    lista_uzytkownikow Uzytkownik;
+    fstream plik;
+    plik.open("ZarejestrowaniUzytkownicy.txt", ios::in);
+    if (!plik.good())
+    {
+        return;
+    }
+    else    if (plik.good())
+    {
+        string kolejnaLinia;
+        char znak;
+
+        while(getline(plik,kolejnaLinia))
+        {
+            int dlugoscSlowa = kolejnaLinia.length();
+            login.clear();
+            haslo.clear();
+            id=0;
+            idUzytkownika.clear();
+            int licznikPrzerywnikowDanych=1;
+
+            for (int i=0; i<=dlugoscSlowa; i++)
+            {
+                znak=kolejnaLinia[i];
+                if (znak=='|')
+                    licznikPrzerywnikowDanych++;
+                else switch(licznikPrzerywnikowDanych)
+                    {
+                    case 1:
+                        idUzytkownika+=znak;
+                        break;
+                    case 2:
+                        id=atoi(idUzytkownika.c_str());
+                        login+=kolejnaLinia[i];
+                        break;
+                    case 3:
+                        haslo+=kolejnaLinia[i];
+                        break;
+                    }
+
+            }
+
+            Uzytkownik.idUzytkownika=id;
+            Uzytkownik.login=login;
+            Uzytkownik.haslo=haslo;
+
+            zarejestrowaniUzytkownicy.push_back(Uzytkownik);
+        }
+        plik.close();
+
+    }
+    else return;
+}
+
+void logowanieUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy)
+{
+
+}
+
+void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy)
+{
+    int idUzytkownika;
+    string login, haslo, hasloWeryfikacyjne;
+    lista_uzytkownikow nowyUzytkownik;
+    int pomocniczy = zarejestrowaniUzytkownicy.size()-1;
+
+    cout <<zarejestrowaniUzytkownicy[pomocniczy].idUzytkownika+1;
+
+    if (zarejestrowaniUzytkownicy.size()==0)
+        idUzytkownika=1;
+    else idUzytkownika=zarejestrowaniUzytkownicy[pomocniczy].idUzytkownika+1;
+
+    system("cls");
+    cout <<"Rejestracja nowego uzytkownika Ksiazki Adresowej."<<endl;
+    cout <<"Podaj login, ktorym bedziesz sie logowac: ";
+    cin >> login;
+    cout <<endl<<endl<< "Podaj haslo, ktorym sie bedziesz logowac: ";
+    cin >> haslo;
+    cout <<endl<<"Potwierdz haslo: ";
+    cin >>hasloWeryfikacyjne;
+    cout << endl;
+
+    if (haslo!=hasloWeryfikacyjne)
+    {
+        cout << "Nieudana rejestracja. Sprobuj ponownie.";
+        Sleep(1500);
+        rejestracjaUzytkownika(zarejestrowaniUzytkownicy);
+    }
+
+    if (zarejestrowaniUzytkownicy.size()!=0)
+    {
+
+    for (int i=0; i<=zarejestrowaniUzytkownicy.size(); i++)
+    {
+        if (login==zarejestrowaniUzytkownicy[i].login)
+        {
+            cout << "Istnieje juz uzytkownik o takiej nazwie. Sprobuj ponownie."<<endl;
+            rejestracjaUzytkownika(zarejestrowaniUzytkownicy);
+            break;
+        }
+    }
+    }
+    nowyUzytkownik.idUzytkownika=idUzytkownika;
+    nowyUzytkownik.login=login;
+    nowyUzytkownik.haslo=haslo;
+
+    zarejestrowaniUzytkownicy.push_back(nowyUzytkownik);
+
+    fstream plik;
+    plik.open("ZarejestrowaniUzytkownicy.txt", ios::out | ios::app);
+
+    plik << idUzytkownika<<"|";
+    plik << login<<"|";
+    plik << haslo <<"|"<<endl;
+
+    plik.close();
+
+
+}
+
+
+int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+{
+
+    int pozycjaWpisu;
+    if (WpisWKsiazceAdresowej.size()==0) pozycjaWpisu=0;
+    else if (WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu>=liczbaPozycjiWKsiazce) pozycjaWpisu=WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce-1].pozycjaWpisu;
+    else pozycjaWpisu=liczbaPozycjiWKsiazce;
+
+
+    string imie;
+    string nazwisko;
+    string telefon;
+    string email;
+    string adres;
+    ksiazka_adresowa Adresat;
+
+
+    system("cls");
+    cout << "Podaj imie: "<<endl;
+    cin.sync();
+    getline(cin, imie);
+    cout << "Podaj nazwisko: "<<endl;
+    cin.sync();
+    getline(cin, nazwisko);
+
+    cout << "Podaj telefon: "<<endl;
+    cin.sync();
+    getline(cin, telefon);
+    cout << "Podaj email: "<<endl;
+    cin >> email;
+    cout << "Podaj adres: "<<endl;
+    cin.sync();
+    getline(cin, adres);
+
+    Adresat.pozycjaWpisu=pozycjaWpisu+1;
+    Adresat.imie=imie;
+    Adresat.nazwisko=nazwisko;
+    Adresat.telefon=telefon;
+    Adresat.email=email;
+    Adresat.adres=adres;
+
+    WpisWKsiazceAdresowej.push_back(Adresat);
+
+    fstream plik;
+    plik.open("KsiazkaAdresowa.txt", ios::out | ios::app);
+
+    plik << pozycjaWpisu+1<<"|";
+    plik << imie<<"|";
+    plik << nazwisko <<"|";
+    plik << telefon <<"|";
+    plik << email <<"|";
+    plik << adres <<"|"<<endl;
+
+    plik.close();
+
+    liczbaPozycjiWKsiazce++;
+    return liczbaPozycjiWKsiazce;
+}
+
+void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+{
+    cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].pozycjaWpisu<<"|";
+    cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].imie<<"|";
+    cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].nazwisko<<"|";
+    cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].telefon<<"|";
+    cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].email<<"|";
+    cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].adres<<"|"<<endl;
+    Sleep(1000);
+}
+
+void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+{
+
+    char wyborSzukaniePozycji;
+    int weryfikacjaPetliWyszukania=liczbaPozycjiWKsiazce;
+    string podaneDaneSzukanie;
+
+    system("cls");
+
+    cout << "Wybierz dane do wyszukania:"<<endl;
+    cout << "1. Szukaj po imieniu."<<endl;
+    cout << "2. Szukaj po nazwisku."<<endl;
+    cout << "3. Szukaj po numerze telefonu."<<endl;
+    cout << "4. Szukaj po adresie email."<<endl;
+    cout << "5. Powrot."<<endl;
+
+    cout << "Podaj numer opcji: ";
+    cin >> wyborSzukaniePozycji;
+
+    if (wyborSzukaniePozycji=='1')
+    {
+        cout << "Podaj imie: "<<endl;
+        cin.sync();
+        getline(cin, podaneDaneSzukanie);
+
+        for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
+        {
+            if (WpisWKsiazceAdresowej[i].imie==podaneDaneSzukanie)
+            {
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                weryfikacjaPetliWyszukania++;
+            }
+        }
+        if (weryfikacjaPetliWyszukania==liczbaPozycjiWKsiazce)
+            cout << "Brak takiej osoby. Mozesz wprowadzic ja w menu glownym, opcja 1."<<endl;
+        system("pause");
+    }
+    if (wyborSzukaniePozycji=='2')
+    {
+        cout << "Podaj nazwisko: "<<endl;
+        cin >> podaneDaneSzukanie;
+
+        for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
+        {
+            if (WpisWKsiazceAdresowej[i].nazwisko==podaneDaneSzukanie)
+            {
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                weryfikacjaPetliWyszukania++;
+            }
+        }
+        if (weryfikacjaPetliWyszukania==liczbaPozycjiWKsiazce)
+            cout << "Brak takiej osoby. Mozesz wprowadzic ja w menu glownym, opcja 1."<<endl;
+        system("pause");
+    }
+    if (wyborSzukaniePozycji=='3')
+    {
+        cout << "Podaj numer telefonu: "<<endl;
+        cin >> podaneDaneSzukanie;
+
+        for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
+        {
+            if (WpisWKsiazceAdresowej[i].telefon==podaneDaneSzukanie)
+            {
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                weryfikacjaPetliWyszukania++;
+            }
+        }
+        if (weryfikacjaPetliWyszukania==liczbaPozycjiWKsiazce)
+            cout << "Brak takiej osoby. Mozesz wprowadzic ja w menu glownym, opcja 1."<<endl;
+        system("pause");
+    }
+    if (wyborSzukaniePozycji=='4')
+    {
+        cout << "Podaj adres email: "<<endl;
+        cin >> podaneDaneSzukanie;
+
+        for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
+        {
+            if (WpisWKsiazceAdresowej[i].email==podaneDaneSzukanie)
+            {
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                weryfikacjaPetliWyszukania++;
+            }
+        }
+        if (weryfikacjaPetliWyszukania==liczbaPozycjiWKsiazce)
+            cout << "Brak takiej osoby. Mozesz wprowadzic ja w menu glownym, opcja 1."<<endl;
+        system("pause");
+    }
+}
+
+int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
+{
+    system("cls");
+    int liczbaPozycji=WpisWKsiazceAdresowej.size();
+    int pozycjaDoUsuniecia;
+    cout <<"Podaj pozycje do usuniecia: ";
+    cin >> pozycjaDoUsuniecia;
+
+    for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
+    {
+        if (pozycjaDoUsuniecia==WpisWKsiazceAdresowej[i].pozycjaWpisu)
+        {
+            string potwierdzenieCheciEdycji;
+            cout << "Potwierdz usuniecie danych adresata: "<<WpisWKsiazceAdresowej[i].imie<< " "<<WpisWKsiazceAdresowej[i].nazwisko<<"."<<endl;
+            cout << "Czy usunac dane tej osoby? Wpisz TAK dla potwierdzenia. ";
+            cin >> potwierdzenieCheciEdycji;
+
+            if ((potwierdzenieCheciEdycji=="TAK")||(potwierdzenieCheciEdycji=="tak"))
+            {
+                WpisWKsiazceAdresowej.erase(WpisWKsiazceAdresowej.begin()+i);
+                cout <<".";
+                Sleep(500);
+                cout <<".";
+                Sleep(500);
+                cout <<"."<<endl;
+                Sleep(500);
+                cout <<"Wybrana pozycja zostala usunieta. Powrot do menu glownego.";
+                system("pause");
+                liczbaPozycji--;
+                return liczbaPozycji;
+            }
+            else cout << "Pozycja nie zostala usunieta. Powrot do menu glownego. ";
+            system("pause");
+            return liczbaPozycji;
+        }
+    }
+    cout << "Brak podanej pozycji w ksiazce adresowej. ";
+    system("pause");
+    return liczbaPozycji;
+}
+
+void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
+{
+    string imie, nazwisko, email,adres, telefon, numerPozycji;
+    int id;
+    ksiazka_adresowa Adresat;
+    fstream plik;
+    plik.open("KsiazkaAdresowa.txt", ios::in);
+    if (!plik.good())
+    {
+        return;
+    }
+    else    if (plik.good())
+    {
+        string kolejnaLinia;
+        char znak;
+
+
+        while(getline(plik,kolejnaLinia))
+        {
+            int dlugoscSlowa = kolejnaLinia.length();
+            imie.clear();
+            nazwisko.clear();
+            telefon.clear();
+            email.clear();
+            adres.clear();
+            id=0;
+            numerPozycji.clear();
+            int licznikPrzerywnikowDanych=1;
+
+            for (int i=0; i<=dlugoscSlowa; i++)
+            {
+                znak=kolejnaLinia[i];
+                if (znak=='|')
+                    licznikPrzerywnikowDanych++;
+                else switch(licznikPrzerywnikowDanych)
+                    {
+                    case 1:
+                        numerPozycji+=znak;
+                        break;
+                    case 2:
+                        id=atoi(numerPozycji.c_str());
+                        imie+=kolejnaLinia[i];
+                        break;
+                    case 3:
+                        nazwisko+=kolejnaLinia[i];
+                        break;
+                    case 4:
+                        telefon+=kolejnaLinia[i];
+                        break;
+                    case 5:
+                        email+=kolejnaLinia[i];
+                        break;
+                    case 6:
+                        adres+=kolejnaLinia[i];
+                    }
+
+            }
+
+            Adresat.pozycjaWpisu=id;
+            Adresat.imie=imie;
+            Adresat.nazwisko=nazwisko;
+            Adresat.telefon=telefon;
+            Adresat.email=email;
+            Adresat.adres=adres;
+
+            WpisWKsiazceAdresowej.push_back(Adresat);
+        }
+        plik.close();
+
+
+    }
+    else return;
+}
+
+void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej)
+{
+    system("cls");
+    int liczbaPozycjiWKsiazce = WpisWKsiazceAdresowej.size();
+    if (liczbaPozycjiWKsiazce==0)
+    {
+        cout << "Brak pozycji do wyswielenia"<<endl;
+        Sleep(2000);
+    }
+    else
+    {
+        int petla = 0;
+        while (petla<liczbaPozycjiWKsiazce)
+        {
+            wypisanieDanejPozycji (WpisWKsiazceAdresowej, petla);
+            petla++;
+        }
+        cout << "Koniec wpisow."<<endl;
+        system("pause");
+    }
+}
+
+void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+{
+    string potwierdzenieCheciEdycji;
+    int pozycjaWpisu;
+    int licznikPomocniczy=0;
+
+    system("cls");
+    cout << "Edycja wpisu." << endl;
+//    cout << "Obecnie w ksiazce adresowej masz "<<liczbaPozycjiWKsiazce<< " wpisanych osob."<<endl;
+    cout << "Podaj numer pozycji do edycji: ";
+    cin >> pozycjaWpisu;
+
+
+    for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
+    {
+        if (pozycjaWpisu!=WpisWKsiazceAdresowej[i].pozycjaWpisu)
+        {
+            licznikPomocniczy++;
+        }
+    }
+
+    if (licznikPomocniczy==WpisWKsiazceAdresowej.size())
+    {
+        cout << "Bledny numer pozycji wpisu. Sprobuj jeszcze raz. "<<endl;
+        Sleep(700);
+        edycjaWybranejPozycji(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
+    }
+
+
+    for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
+    {
+        if (pozycjaWpisu==WpisWKsiazceAdresowej[i].pozycjaWpisu)
+        {
+            wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+            cout << "Czy chcesz podac nowe dane tej osoby? Wpisz TAK dla potwierdzenia. ";
+            cin >> potwierdzenieCheciEdycji;
+
+            if ((potwierdzenieCheciEdycji=="TAK")||(potwierdzenieCheciEdycji=="tak"))
+            {
+                int wyborElementuDoZmiany;
+                cout << "Co chcesz zmienic? Podaj numer opcji."<<endl;
+                cout << "1. Imie" << endl;
+                cout << "2. Nazwisko" << endl;
+                cout << "3. Telefon" << endl;
+                cout << "4. Email" << endl;
+                cout << "5. Adres" << endl << endl;
+                cin >> wyborElementuDoZmiany;
+
+                switch(wyborElementuDoZmiany)
+                {
+                case 1:
+                    cout << "Obecne imie: "<< WpisWKsiazceAdresowej[i].imie << ". Podaj nowe imie: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].imie);
+                    break;
+                case 2:
+                    cout << "Obecne nazwisko: "<< WpisWKsiazceAdresowej[i].nazwisko << ". Podaj nowe nazwisko: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].nazwisko);
+                    break;
+                case 3:
+                    cout << "Obecny telefon: "<< WpisWKsiazceAdresowej[i].telefon << ". Podaj nowy telefon: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].telefon);
+                    break;
+                case 4:
+                    cout << "Obecny email: "<< WpisWKsiazceAdresowej[i].email <<  ". Podaj nowy email: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].email);
+                    break;
+                case 5:
+                    cout <<"Obecny adres: "<< WpisWKsiazceAdresowej[i].adres << ". Podaj nowy adres: ";
+                    cin.sync();
+                    getline(cin, WpisWKsiazceAdresowej[i].adres);
+                    break;
+                }
+            }
+            else cout << "Powrot do menu glownego."<<endl;
+            system("pause");
+            return;
+        }
+    }
+
+}
+
+void zapisaniePlikuPrzedZamknieciem (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycji)
+{
+    fstream plik;
+    plik.open("KsiazkaAdresowa.txt", ios::out | ios::trunc);
+
+    for (int i=0; i<liczbaPozycji; i++)
+    {
+        plik << WpisWKsiazceAdresowej[i].pozycjaWpisu<<"|";
+        plik << WpisWKsiazceAdresowej[i].imie<<"|";
+        plik << WpisWKsiazceAdresowej[i].nazwisko <<"|";
+        plik << WpisWKsiazceAdresowej[i].telefon <<"|";
+        plik << WpisWKsiazceAdresowej[i].email <<"|";
+        plik << WpisWKsiazceAdresowej[i].adres <<"|"<<endl;
+    }
+    plik.close();
+}
