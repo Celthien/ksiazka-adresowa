@@ -29,12 +29,12 @@ void otworzeniePlikuUzytkonikow (vector <lista_uzytkownikow> &zarejestrowaniUzyt
 int logowanieUzytkownika (vector <lista_uzytkownikow> &listaUzytkownikow);
 void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy);
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
-void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
-void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
-int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej);
-void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzytkownika);
-void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej);
-void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce);
+void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
+void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
+int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzytkownika);
+void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej);
+void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int idUzytkownika);
+void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
 void zapisaniePlikuPrzedZamknieciem (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycji);
 
 int main()
@@ -91,7 +91,7 @@ ksiazka:
 
         //Otworzenie pliku zalezne od zalogowanego uzytkownika!!
 
-        otworzeniePliku(WpisWKsiazceAdresowej,ktoZalogowany);
+        otworzeniePliku(WpisWKsiazceAdresowej);
         int pom = WpisWKsiazceAdresowej.size();
         if (pom!=0)
         {
@@ -122,20 +122,20 @@ ksiazka:
         }
         else if (wybraneZadanie=='2')
         {
-            wyszukiwanieOsobyWKsiazce(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce);
+            wyszukiwanieOsobyWKsiazce(WpisWKsiazceAdresowej,liczbaPozycjiWKsiazce,ktoZalogowany);
         }
         else if (wybraneZadanie=='3')
         {
-            wyswietlenieWszystkichOsob(WpisWKsiazceAdresowej);
+            wyswietlenieWszystkichOsob(WpisWKsiazceAdresowej,ktoZalogowany);
         }
         else if (wybraneZadanie=='4')
         {
-            edycjaWybranejPozycji(WpisWKsiazceAdresowej,WpisWKsiazceAdresowej.size());
+            edycjaWybranejPozycji(WpisWKsiazceAdresowej,WpisWKsiazceAdresowej.size(),ktoZalogowany);
             zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='5')
         {
-            liczbaPozycjiWKsiazce=usuniecieWpisu(WpisWKsiazceAdresowej);
+            liczbaPozycjiWKsiazce=usuniecieWpisu(WpisWKsiazceAdresowej,ktoZalogowany);
             zapisaniePlikuPrzedZamknieciem(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
         }
         else if (wybraneZadanie=='6')
@@ -145,6 +145,7 @@ ksiazka:
         if (wybraneZadanie=='7')
         {
             goto poczatek;
+            //wyczyszczenie pliku adresowego przed zmiana uzytkownika
         }
         else if (wybraneZadanie=='8')
         {
@@ -156,7 +157,7 @@ ksiazka:
 
 void otworzeniePlikuUzytkonikow (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy)
 {
-    string login, haslo,idUzytkownika;
+    string login, haslo, idUzytkownika;
     int id;
     lista_uzytkownikow Uzytkownik;
     fstream plik;
@@ -326,6 +327,7 @@ void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkown
 }
 
 
+
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika)
 {
 
@@ -386,7 +388,7 @@ int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczba
     return liczbaPozycjiWKsiazce;
 }
 
-void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika)
 {
     cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].pozycjaWpisu<<"|";
     cout << WpisWKsiazceAdresowej[liczbaPozycjiWKsiazce].imie<<"|";
@@ -397,7 +399,7 @@ void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int
     Sleep(1000);
 }
 
-void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika)
 {
 
     char wyborSzukaniePozycji;
@@ -424,9 +426,9 @@ void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej,
 
         for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
         {
-            if (WpisWKsiazceAdresowej[i].imie==podaneDaneSzukanie)
+            if ((WpisWKsiazceAdresowej[i].imie==podaneDaneSzukanie)&&(WpisWKsiazceAdresowej[i].idUzytkownika==idUzytkownika))
             {
-                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i, idUzytkownika);
                 weryfikacjaPetliWyszukania++;
             }
         }
@@ -441,9 +443,9 @@ void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej,
 
         for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
         {
-            if (WpisWKsiazceAdresowej[i].nazwisko==podaneDaneSzukanie)
+            if ((WpisWKsiazceAdresowej[i].nazwisko==podaneDaneSzukanie)&&(WpisWKsiazceAdresowej[i].idUzytkownika==idUzytkownika))
             {
-                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i,idUzytkownika);
                 weryfikacjaPetliWyszukania++;
             }
         }
@@ -458,9 +460,9 @@ void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej,
 
         for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
         {
-            if (WpisWKsiazceAdresowej[i].telefon==podaneDaneSzukanie)
+            if ((WpisWKsiazceAdresowej[i].telefon==podaneDaneSzukanie)&&(WpisWKsiazceAdresowej[i].idUzytkownika==idUzytkownika))
             {
-                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i,idUzytkownika);
                 weryfikacjaPetliWyszukania++;
             }
         }
@@ -475,9 +477,9 @@ void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej,
 
         for (int i=0; i<=liczbaPozycjiWKsiazce; i++)
         {
-            if (WpisWKsiazceAdresowej[i].email==podaneDaneSzukanie)
+            if ((WpisWKsiazceAdresowej[i].email==podaneDaneSzukanie)&&(WpisWKsiazceAdresowej[i].idUzytkownika==idUzytkownika))
             {
-                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+                wypisanieDanejPozycji(WpisWKsiazceAdresowej,i,idUzytkownika);
                 weryfikacjaPetliWyszukania++;
             }
         }
@@ -487,19 +489,27 @@ void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej,
     }
 }
 
-int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
+int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzytkownika)
 {
     system("cls");
     int liczbaPozycji=WpisWKsiazceAdresowej.size();
     int pozycjaDoUsuniecia;
     cout <<"Podaj pozycje do usuniecia: ";
     cin >> pozycjaDoUsuniecia;
+    string potwierdzenieCheciEdycji;
 
     for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
     {
-        if (pozycjaDoUsuniecia==WpisWKsiazceAdresowej[i].pozycjaWpisu)
+
+        if ((pozycjaDoUsuniecia==WpisWKsiazceAdresowej[i].pozycjaWpisu))
         {
-            string potwierdzenieCheciEdycji;
+            if (WpisWKsiazceAdresowej[i].idUzytkownika!=idUzytkownika)
+            {
+                cout << "Probujesz usunac wpis innego uzytkownika. Podaj inny numer pozycji. ";
+                Sleep(1000);
+                usuniecieWpisu(WpisWKsiazceAdresowej, idUzytkownika);
+            }
+            else
             cout << "Potwierdz usuniecie danych adresata: "<<WpisWKsiazceAdresowej[i].imie<< " "<<WpisWKsiazceAdresowej[i].nazwisko<<"."<<endl;
             cout << "Czy usunac dane tej osoby? Wpisz TAK dla potwierdzenia. ";
             cin >> potwierdzenieCheciEdycji;
@@ -523,12 +533,13 @@ int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
             return liczbaPozycji;
         }
     }
+
     cout << "Brak podanej pozycji w ksiazce adresowej. ";
     system("pause");
     return liczbaPozycji;
 }
 
-void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzytkownika)
+void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej)
 {
     string imie, nazwisko, email,adres, telefon, numerPozycji, numerUzytkownika;
     int pozycja, wlasciciel;
@@ -595,21 +606,15 @@ void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzy
 
             }
 
-            if (wlasciciel==idUzytkownika)
-            {
+            Adresat.pozycjaWpisu=pozycja;
+            Adresat.idUzytkownika=wlasciciel;
+            Adresat.imie=imie;
+            Adresat.nazwisko=nazwisko;
+            Adresat.telefon=telefon;
+            Adresat.email=email;
+            Adresat.adres=adres;
 
-
-                Adresat.pozycjaWpisu=pozycja;
-                Adresat.idUzytkownika=wlasciciel;
-                Adresat.imie=imie;
-                Adresat.nazwisko=nazwisko;
-                Adresat.telefon=telefon;
-                Adresat.email=email;
-                Adresat.adres=adres;
-
-                WpisWKsiazceAdresowej.push_back(Adresat);
-            }
-
+            WpisWKsiazceAdresowej.push_back(Adresat);
 
         }
         plik.close();
@@ -619,7 +624,7 @@ void otworzeniePliku(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzy
     else return;
 }
 
-void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej)
+void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int idUzytkownika)
 {
     system("cls");
     int liczbaPozycjiWKsiazce = WpisWKsiazceAdresowej.size();
@@ -633,7 +638,12 @@ void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej)
         int petla = 0;
         while (petla<liczbaPozycjiWKsiazce)
         {
-            wypisanieDanejPozycji (WpisWKsiazceAdresowej, petla);
+            if (WpisWKsiazceAdresowej[petla].idUzytkownika!=idUzytkownika)
+            {
+                petla++;
+                continue;
+            }
+            wypisanieDanejPozycji (WpisWKsiazceAdresowej, petla,idUzytkownika);
             petla++;
         }
         cout << "Koniec wpisow."<<endl;
@@ -641,7 +651,7 @@ void wyswietlenieWszystkichOsob(vector <ksiazka_adresowa> WpisWKsiazceAdresowej)
     }
 }
 
-void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce)
+void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika)
 {
     string potwierdzenieCheciEdycji;
     int pozycjaWpisu;
@@ -652,7 +662,6 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
 //    cout << "Obecnie w ksiazce adresowej masz "<<liczbaPozycjiWKsiazce<< " wpisanych osob."<<endl;
     cout << "Podaj numer pozycji do edycji: ";
     cin >> pozycjaWpisu;
-
 
     for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
     {
@@ -665,16 +674,16 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
     if (licznikPomocniczy==WpisWKsiazceAdresowej.size())
     {
         cout << "Bledny numer pozycji wpisu. Sprobuj jeszcze raz. "<<endl;
-        Sleep(700);
-        edycjaWybranejPozycji(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size());
+        Sleep(1000);
+        edycjaWybranejPozycji(WpisWKsiazceAdresowej, WpisWKsiazceAdresowej.size(),idUzytkownika);
     }
 
 
     for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
     {
-        if (pozycjaWpisu==WpisWKsiazceAdresowej[i].pozycjaWpisu)
+        if ((pozycjaWpisu==WpisWKsiazceAdresowej[i].pozycjaWpisu)&&(WpisWKsiazceAdresowej[i].idUzytkownika==idUzytkownika))
         {
-            wypisanieDanejPozycji(WpisWKsiazceAdresowej,i);
+            wypisanieDanejPozycji(WpisWKsiazceAdresowej,i,idUzytkownika);
             cout << "Czy chcesz podac nowe dane tej osoby? Wpisz TAK dla potwierdzenia. ";
             cin >> potwierdzenieCheciEdycji;
 
@@ -722,6 +731,12 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
             system("pause");
             return;
         }
+        else
+        {
+            cout << "Probujesz edytowac nie swoj wpis. Sprobuj ponownie.";
+            Sleep(2000);
+            edycjaWybranejPozycji(WpisWKsiazceAdresowej, liczbaPozycjiWKsiazce, idUzytkownika);
+        }
     }
 
 }
@@ -734,6 +749,7 @@ void zapisaniePlikuPrzedZamknieciem (vector <ksiazka_adresowa> &WpisWKsiazceAdre
     for (int i=0; i<liczbaPozycji; i++)
     {
         plik << WpisWKsiazceAdresowej[i].pozycjaWpisu<<"|";
+        plik << WpisWKsiazceAdresowej[i].idUzytkownika<<"|";
         plik << WpisWKsiazceAdresowej[i].imie<<"|";
         plik << WpisWKsiazceAdresowej[i].nazwisko <<"|";
         plik << WpisWKsiazceAdresowej[i].telefon <<"|";
