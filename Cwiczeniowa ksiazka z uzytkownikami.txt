@@ -28,6 +28,9 @@ struct lista_uzytkownikow
 void otworzeniePlikuUzytkonikow (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy);
 int logowanieUzytkownika (vector <lista_uzytkownikow> &listaUzytkownikow);
 void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy);
+void zmianaHasla (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy, int idUzytkownika);
+void zapisaniePlikuUzytkownicy (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy);
+
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
 void wypisanieDanejPozycji (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
 void wyszukiwanieOsobyWKsiazce (vector <ksiazka_adresowa> WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika);
@@ -85,12 +88,8 @@ poczatek:
 
 
 ksiazka:
-    while (true)
-    {
-
-
-        //Otworzenie pliku zalezne od zalogowanego uzytkownika!!
-
+            //Otworzenie pliku zalezne od zalogowanego uzytkownika!!
+        WpisWKsiazceAdresowej.clear();
         otworzeniePliku(WpisWKsiazceAdresowej);
         int pom = WpisWKsiazceAdresowej.size();
         if (pom!=0)
@@ -101,7 +100,8 @@ ksiazka:
         }
 
 
-
+    while (true)
+    {
         system("cls");
 
         cout << "Ksiazka adresowa. Wybierz zadanie: " << endl;
@@ -140,7 +140,7 @@ ksiazka:
         }
         else if (wybraneZadanie=='6')
         {
-            //Zmiana hasla
+            zmianaHasla(zarejestrowaniUzytkownicy, ktoZalogowany);
         }
         if (wybraneZadanie=='7')
         {
@@ -157,6 +157,7 @@ ksiazka:
 
 void otworzeniePlikuUzytkonikow (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy)
 {
+    zarejestrowaniUzytkownicy.clear();
     string login, haslo, idUzytkownika;
     int id;
     lista_uzytkownikow Uzytkownik;
@@ -282,9 +283,9 @@ void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkown
     cout <<"Rejestracja nowego uzytkownika Ksiazki Adresowej."<<endl;
     cout <<"Podaj login, ktorym bedziesz sie logowac: ";
     cin >> login;
-    cout <<endl<< "Podaj haslo, ktorym sie bedziesz logowac: ";
+    cout <<"Podaj haslo, ktorym sie bedziesz logowac: ";
     cin >> haslo;
-    cout <<endl<<"Potwierdz haslo: ";
+    cout <<"Dla potwierdzenia wpisz haslo ponownie: ";
     cin >>hasloWeryfikacyjne;
     cout << endl;
 
@@ -326,7 +327,60 @@ void rejestracjaUzytkownika (vector <lista_uzytkownikow> &zarejestrowaniUzytkown
 
 }
 
+void zmianaHasla (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy, int idUzytkownika)
+{
+    string haslo, nowehaslo, weryfikacjaHasla;
+    system("cls");
+    cout << "Zmiana hasla." << endl;
+    cout << "**Jesli chcesz wrocic do menu glownego, wpisz zero.**"<<endl;
+    cout << "Potwierdz stare haslo, by moc ustawic nowe: ";
+    cin >> haslo;
 
+    if (haslo=="0") return;
+
+    if (haslo==zarejestrowaniUzytkownicy[idUzytkownika-1].haslo)
+    {
+        cout << "Podaj nowe haslo: ";
+        cin >> nowehaslo;
+        cout << "Dla potwierdzenia wpisz nowe haslo ponownie: ";
+        cin >> weryfikacjaHasla;
+
+        if (nowehaslo!=weryfikacjaHasla)
+        {
+            cout << "Hasla sie nie zgadzaja, sprobuj ponownie.";
+            Sleep(1500);
+            zmianaHasla(zarejestrowaniUzytkownicy, idUzytkownika);
+        }
+        else cout << "Zamiana hasla przebiegla pomyslnie.";
+        Sleep(1500);
+        zarejestrowaniUzytkownicy[idUzytkownika-1].haslo=nowehaslo;
+        zapisaniePlikuUzytkownicy(zarejestrowaniUzytkownicy);
+        otworzeniePlikuUzytkonikow(zarejestrowaniUzytkownicy);
+        return;
+    }
+    else cout << "Niepoprawne haslo. Sprobuj ponownie.";
+        zmianaHasla(zarejestrowaniUzytkownicy, idUzytkownika);
+
+
+}
+
+void zapisaniePlikuUzytkownicy (vector <lista_uzytkownikow> &zarejestrowaniUzytkownicy)
+{
+    int liczbaPozycji = zarejestrowaniUzytkownicy.size();
+
+    fstream plik;
+    plik.open("ZarejestrowaniUzytkownicy.txt", ios::out | ios::trunc);
+
+    for (int i=0; i<liczbaPozycji; i++)
+    {
+    plik << zarejestrowaniUzytkownicy[i].idUzytkownika<<"|";
+    plik << zarejestrowaniUzytkownicy[i].login<<"|";
+    plik << zarejestrowaniUzytkownicy[i].haslo <<"|"<<endl;
+    }
+    plik.close();
+}
+
+//funkcje ksiazki
 
 int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczbaPozycjiWKsiazce, int idUzytkownika)
 {
@@ -351,7 +405,6 @@ int dodaniePozycji (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int liczba
     cout << "Podaj nazwisko: "<<endl;
     cin.sync();
     getline(cin, nazwisko);
-
     cout << "Podaj telefon: "<<endl;
     cin.sync();
     getline(cin, telefon);
@@ -494,9 +547,13 @@ int usuniecieWpisu (vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int idUzyt
     system("cls");
     int liczbaPozycji=WpisWKsiazceAdresowej.size();
     int pozycjaDoUsuniecia;
+    cout << "Usuwanie pozycji z ksiazki adresowej"<<endl;
+    cout << "**Jesli chcesz wrocic do menu glownego, wpisz zero.**"<<endl;
     cout <<"Podaj pozycje do usuniecia: ";
     cin >> pozycjaDoUsuniecia;
     string potwierdzenieCheciEdycji;
+
+    if (pozycjaDoUsuniecia==0) return liczbaPozycji;
 
     for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
     {
@@ -659,9 +716,12 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
 
     system("cls");
     cout << "Edycja wpisu." << endl;
+    cout << "**Jesli chcesz wrocic do menu glownego, wpisz zero.**"<<endl;
 //    cout << "Obecnie w ksiazce adresowej masz "<<liczbaPozycjiWKsiazce<< " wpisanych osob."<<endl;
     cout << "Podaj numer pozycji do edycji: ";
     cin >> pozycjaWpisu;
+
+    if (pozycjaWpisu==0) return;
 
     for (int i=0; i<WpisWKsiazceAdresowej.size(); i++)
     {
@@ -726,18 +786,19 @@ void edycjaWybranejPozycji(vector <ksiazka_adresowa> &WpisWKsiazceAdresowej, int
                     getline(cin, WpisWKsiazceAdresowej[i].adres);
                     break;
                 }
+                cout << "Zapisano zmiany.";
+                system("pause");
+                return;
             }
             else cout << "Powrot do menu glownego."<<endl;
             system("pause");
             return;
         }
-        else
-        {
+    }
             cout << "Probujesz edytowac nie swoj wpis. Sprobuj ponownie.";
             Sleep(2000);
             edycjaWybranejPozycji(WpisWKsiazceAdresowej, liczbaPozycjiWKsiazce, idUzytkownika);
-        }
-    }
+
 
 }
 
